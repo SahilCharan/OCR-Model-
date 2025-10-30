@@ -1,0 +1,12 @@
+{
+  "name": "ocr-model",
+  "version": "1.0.0",
+  "description": "OCR Model Application",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "keywords": ["ocr", "image-analysis"],
+  "author": "",
+  "license": "ISC"
+}
