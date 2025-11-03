@@ -1,12 +1,9 @@
 {
-  "name": "ocr-model",
-  "version": "1.0.0",
-  "description": "OCR Model Application",
-  "main": "index.js",
-  "scripts": {
-    "start": "node index.js"
+  "dependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-scripts": "^5.0.0"
   },
-  "keywords": ["ocr", "image-analysis"],
-  "author": "",
-  "license": "ISC"
+  "main": "/index.js",
+  "devDependencies": {}
 }
