@@ -1,317 +1,109 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
-const styles = {
-  container: {
-    padding: 24,
-    fontFamily: 'Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif',
-    color: '#0f172a',
-    background: '#f8fafc',
-    minHeight: '100vh',
-  },
-  h1: { fontSize: 22, fontWeight: 700, margin: 0, color: '#0f172a' },
-  sub: { marginTop: 6, color: '#475569', fontSize: 14 },
-  formRow: { display: 'flex', gap: 12, marginTop: 16, alignItems: 'center' },
-  input: {
-    padding: '10px 12px',
-    borderRadius: 8,
-    border: '1px solid #e2e8f0',
-    background: '#fff',
-  },
-  btn: {
-    padding: '10px 14px',
-    borderRadius: 8,
-    border: '1px solid #1e293b',
-    background: '#0f172a',
-    color: '#fff',
-    fontWeight: 600,
-    cursor: 'pointer',
-  },
-  btnDisabled: { opacity: 0.6, cursor: 'not-allowed' },
-  error: {
-    marginTop: 12,
-    color: '#b91c1c',
-    background: '#fee2e2',
-    border: '1px solid #fecaca',
-    borderRadius: 8,
-    padding: '10px 12px',
-    fontSize: 14,
-  },
-  grid: {
-    display: 'grid',
-    gridTemplateColumns: '1fr',
-    gap: 16,
-    marginTop: 20,
-  },
-  card: {
-    background: '#fff',
-    border: '1px solid #e2e8f0',
-    borderRadius: 14,
-    boxShadow: '0 1px 2px rgba(2, 6, 23, 0.04)',
-  },
-  cardHeader: {
-    padding: '12px 16px',
-    borderBottom: '1px solid #e2e8f0',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  cardTitle: { fontSize: 16, fontWeight: 700, color: '#0f172a' },
-  cardBody: { padding: 16 },
-  kpis: { display: 'flex', gap: 12, flexWrap: 'wrap' },
-  kpi: {
-    background: '#f1f5f9',
-    border: '1px solid #e2e8f0',
-    borderRadius: 10,
-    padding: '10px 12px',
-    minWidth: 140,
-  },
-  kpiLabel: { fontSize: 12, color: '#475569' },
-  kpiValue: { fontSize: 16, fontWeight: 700, marginTop: 2, color: '#0f172a' },
-  mono: {
-    fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace',
-    whiteSpace: 'pre-wrap',
-    wordBreak: 'break-word',
-    background: '#f8fafc',
-    border: '1px solid #e2e8f0',
-    borderRadius: 10,
-    padding: 12,
-    maxHeight: 300,
-    overflowY: 'auto',
-  },
-  table: {
-    width: '100%',
-    borderCollapse: 'separate',
-    borderSpacing: 0,
-    fontSize: 14,
-  },
-  th: {
-    textAlign: 'left',
-    padding: '10px 12px',
-    background: '#f8fafc',
-    borderBottom: '1px solid #e2e8f0',
-    position: 'sticky',
-    top: 0,
-    zIndex: 1,
-  },
-  td: { padding: '10px 12px', borderBottom: '1px solid #f1f5f9', verticalAlign: 'top' },
-  badge: (type) => ({
-    display: 'inline-block',
-    padding: '2px 8px',
-    borderRadius: 999,
-    fontSize: 12,
-    fontWeight: 700,
-    background:
-      type === 'Spelling' ? '#eef2ff' :
-      type === 'Grammar' ? '#ecfeff' :
-      type === 'Consistency' ? '#fef3c7' : '#f1f5f9',
-    color:
-      type === 'Spelling' ? '#3730a3' :
-      type === 'Grammar' ? '#155e75' :
-      type === 'Consistency' ? '#92400e' : '#334155',
-    border:
-      type === 'Spelling' ? '1px solid #e0e7ff' :
-      type === 'Grammar' ? '1px solid #cffafe' :
-      type === 'Consistency' ? '1px solid #fde68a' : '1px solid #e2e8f0',
-  }),
-  highlightWrong: { background: '#fff1f2', border: '1px dashed #fecdd3', borderRadius: 8, padding: 8 },
-  highlightRight: { background: '#ecfdf5', border: '1px dashed #bbf7d0', borderRadius: 8, padding: 8 },
-  small: { fontSize: 12, color: '#64748b' },
-  footerNote: { marginTop: 10, fontSize: 12, color: '#64748b' },
-};
-
-function normalizePayload(res) {
-  // Your sample is an array with one object
-  const first = Array.isArray(res) ? res[0] : res || {};
-  const extracted =
-    first.extractedText ||
-    first.extracted_text ||
-    first.content?.extractedText ||
-    '';
-  const errors =
-    first.errorsAndCorrections ||
-    first.errors_and_corrections ||
-    [];
-
-  // Convert a long string into a readable block; keep as-is to avoid losing text
-  const extractedBlock =
-    Array.isArray(extracted) ? extracted.join('\n') : String(extracted || '');
-
-  return { extractedBlock, errors: Array.isArray(errors) ? errors : [] };
-}
-
-const OCRDemo = () => {
-  const [file, setFile] = useState(null);
-  const [response, setResponse] = useState(null);
+export default function ImageViewer() {
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [preview, setPreview] = useState(null);
+  const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
 
-  const n8nWebhookURL = 'https://flexscale.app.n8n.cloud/webhook/009f42dc-b706-4eb7-988d-c59cc8ca4e3f'; // Replace with your n8n webhook URL
+  const WEBHOOK_URL =
+    "https://shreyahubcredo.app.n8n.cloud/webhook/009f42dc-b706-4eb7-988d-c59cc8ca4e3f";
 
   const handleFileChange = (e) => {
-    setFile(e.target.files[0]);
-    setResponse(null);
-    setError(null);
+    const file = e.target.files[0];
+    if (!file) return;
+    setSelectedFile(file);
+    setPreview(URL.createObjectURL(file));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!file) {
-      setError('Please upload an image file.');
+  const handleUpload = async () => {
+    if (!selectedFile) {
+      alert("Please select an image first!");
       return;
     }
-    setLoading(true);
-    setError(null);
 
-    const formData = new FormData();
-    formData.append('file', file);
+    setLoading(true);
+    setResult(null);
 
     try {
-      const res = await fetch(n8nWebhookURL, {
-        method: 'POST',
+      const formData = new FormData();
+      formData.append("file", selectedFile);
+
+      const response = await fetch(WEBHOOK_URL, {
+        method: "POST",
         body: formData,
       });
 
-      if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+      if (!response.ok) throw new Error("Failed to process image");
 
-      const data = await res.json();
-      setResponse(data);
-    } catch (err) {
-      setError('Failed to fetch results. ' + err.message);
+      const data = await response.json();
+      setResult(data);
+    } catch (error) {
+      console.error(error);
+      alert("Upload failed. Check console for details.");
     } finally {
       setLoading(false);
     }
   };
 
-  const normalized = response ? normalizePayload(response) : { extractedBlock: '', errors: [] };
-  const totalErrors = normalized.errors.length;
-
   return (
-    <div style={styles.container}>
-      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
-        <h1 style={styles.h1}>Image OCR & Spelling Correction</h1>
-        <div style={styles.sub}>Clean layout • Readable errors • Copy-friendly</div>
-      </div>
+    <div className="flex flex-col items-center p-6 bg-gray-50 rounded-xl shadow-md max-w-2xl mx-auto">
+      <h2 className="text-xl font-bold mb-4">Image Analysis Dashboard</h2>
 
-      <form onSubmit={handleSubmit} style={styles.formRow}>
-        <input type="file" accept="image/*,.pdf" onChange={handleFileChange} style={styles.input} />
-        <button type="submit" disabled={loading} style={{ ...styles.btn, ...(loading ? styles.btnDisabled : {}) }}>
-          {loading ? 'Processing…' : 'Upload & Analyze'}
-        </button>
-      </form>
+      <input type="file" accept="image/*" onChange={handleFileChange} />
+      {preview && (
+        <img src={preview} alt="preview" className="w-64 h-64 mt-4 rounded-md object-contain border" />
+      )}
 
-      {error && <div style={styles.error}>{error}</div>}
+      <button
+        onClick={handleUpload}
+        disabled={loading}
+        className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50"
+      >
+        {loading ? "Processing..." : "Send to n8n"}
+      </button>
 
-      {response && (
-        <div style={styles.grid}>
-          {/* KPIs */}
-          <section style={styles.card}>
-            <div style={styles.cardHeader}>
-              <div style={styles.cardTitle}>Summary</div>
-            </div>
-            <div style={{ ...styles.cardBody, ...styles.kpis }}>
-              <div style={styles.kpi}>
-                <div style={styles.kpiLabel}>Errors Detected</div>
-                <div style={styles.kpiValue}>{totalErrors}</div>
-              </div>
-              <div style={styles.kpi}>
-                <div style={styles.kpiLabel}>Payload Items</div>
-                <div style={styles.kpiValue}>
-                  {Array.isArray(response) ? response.length : 1}
-                </div>
-              </div>
-            </div>
-          </section>
+      {result && (
+        <div className="mt-6 w-full">
+          <p className="font-semibold">Processed Image:</p>
+          <img
+            src={`data:image/png;base64,${result.image}`}
+            alt="Processed"
+            className="w-80 h-80 mt-2 rounded-md object-contain border"
+          />
 
-          {/* Extracted Text */}
-          <section style={styles.card}>
-            <div style={styles.cardHeader}>
-              <div style={styles.cardTitle}>Extracted Text (Clean)</div>
-              <button
-                onClick={() => navigator.clipboard.writeText(normalized.extractedBlock || '')}
-                style={{ ...styles.btn, padding: '8px 12px' }}
-                type="button"
-              >
-                Copy
-              </button>
-            </div>
-            <div style={styles.cardBody}>
-              <div style={styles.mono}>
-                {normalized.extractedBlock || 'No text extracted.'}
-              </div>
-              <div style={styles.footerNote}>
-                Tip: "Copy" puts the entire extracted text on your clipboard for QA.
-              </div>
-            </div>
-          </section>
+          <div className="mt-4">
+            <h3 className="font-bold mb-1">Extracted Text:</h3>
+            <pre className="bg-gray-200 p-3 rounded-md text-sm overflow-x-auto">{result.text}</pre>
+          </div>
 
-          {/* Errors Table */}
-          <section style={styles.card}>
-            <div style={styles.cardHeader}>
-              <div style={styles.cardTitle}>Errors & Corrections</div>
-              <div style={styles.small}>{totalErrors} total</div>
-            </div>
-            <div style={styles.cardBody}>
-              {totalErrors === 0 ? (
-                <div style={styles.small}>No issues found.</div>
-              ) : (
-                <div style={{ overflowX: 'auto' }}>
-                  <table style={styles.table}>
-                    <thead>
-                      <tr>
-                        <th style={styles.th}>#</th>
-                        <th style={styles.th}>Type</th>
-                        <th style={styles.th}>Found Text</th>
-                        <th style={styles.th}>Correction</th>
-                        <th style={styles.th}>Issue</th>
-                        <th style={styles.th}>Location</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {normalized.errors.map((e, idx) => (
-                        <tr key={idx}>
-                          <td style={styles.td}>{e.error_id ?? idx + 1}</td>
-                          <td style={styles.td}>
-                            <span style={styles.badge(e.error_type)}>{e.error_type || '—'}</span>
-                          </td>
-                          <td style={styles.td}>
-                            <div style={styles.highlightWrong}>{e.found_text || '—'}</div>
-                          </td>
-                          <td style={styles.td}>
-                            <div style={styles.highlightRight}>{e.corrected_text || '—'}</div>
-                          </td>
-                          <td style={styles.td} title={e.issue_description || ''}>
-                            {e.issue_description || '—'}
-                          </td>
-                          <td style={styles.td}>{e.location_hint || '—'}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
-          </section>
-
-          {/* Raw JSON (collapsible feel via maxHeight) */}
-          <section style={styles.card}>
-            <div style={styles.cardHeader}>
-              <div style={styles.cardTitle}>Raw JSON</div>
-              <button
-                onClick={() => navigator.clipboard.writeText(JSON.stringify(response, null, 2))}
-                style={{ ...styles.btn, padding: '8px 12px' }}
-                type="button"
-              >
-                Copy JSON
-              </button>
-            </div>
-            <div style={styles.cardBody}>
-              <pre style={styles.mono}>{JSON.stringify(response, null, 2)}</pre>
-            </div>
-          </section>
+          <div className="mt-4">
+            <h3 className="font-bold mb-1">Detected Errors:</h3>
+            {result.errors.length > 0 ? (
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr>
+                    <th className="border-b py-2">Error Text</th>
+                    <th className="border-b py-2">Type</th>
+                    <th className="border-b py-2">Suggestion</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {result.errors.map((err, i) => (
+                    <tr key={i}>
+                      <td className="border-b py-1">{err.found_text}</td>
+                      <td className="border-b py-1">{err.error_type}</td>
+                      <td className="border-b py-1">{err.suggested_correction || "-"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <p className="text-gray-600">No errors detected 🎉</p>
+            )}
+          </div>
         </div>
       )}
     </div>
   );
-};
-
-export default OCRDemo;
+}
